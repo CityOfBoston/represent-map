@@ -57,6 +57,7 @@ Download this repo, AppFog, and tunneling tool Caldecott
 
     git clone git@github.com:mapmeld/represent-map.git
     gem install af
+    af login
     gem install caldecott
 
 Go to the main directory of this project
