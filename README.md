@@ -46,6 +46,45 @@ Setup should be super easy. Follow these steps:
 8. Challenge your newly-discovered neighbors to ping pong!
 
 
+Setting up on AppFog
+--------------------------------
+
+Simple instructions for free PHP and MySQL hosting on AppFog:
+
+Register for AppFog, create an app, go to the 'Services' panel, and add MySQL with a memorable name such as 'my-mysqldb'.
+
+Download this repo, AppFog, and tunneling tool Caldecott
+
+    git clone git@github.com:mapmeld/represent-map.git
+    gem install af
+    gem install caldecott
+
+Go to the main directory of this project
+
+    cd represent-map/represent-map
+
+Edit index.php with your city name, social media links, latitude and longitude, etc.
+
+Replace images/logo.png with your logo.
+
+Set $admin_user and $admin_pass in db.php - the rest are imported from AppFog's VCAP_SERVICES environment variable.
+
+Push the code to the AppFog app server
+
+    af update
+
+Test the server by visiting the homepage.
+
+You're not done yet! Configure the database with these steps:
+
+    af tunnel
+    (when asked to select a service, select my-mysqldb or whatever you put in for name)
+    (when asked to connect to mysql, mysqldump, or none, select mysql)
+    
+In the MySQL command line, paste the contents of db/settings_1.sql, then press enter. Repeat for db/places_2.sql ( db/places_3.sql if you're using Startup Genome ) and db/events_1.sql ( even if you're not adding events ).
+
+Test the database by going to the homepage and adding a location.
+
 Startup Genome Integration (optional)
 -------------------------------------
 
