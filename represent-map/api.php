@@ -1,8 +1,7 @@
 <?php
-include_once "header.php";
-?>
+  include_once "header.php";
 
-<?php
+  header('Content-type: application/json');
 
   $_escape = function ($str){
      return preg_replace("!([\b\t\n\r\f\"\\'])!", "\\\\\\1", $str);
@@ -25,7 +24,7 @@ include_once "header.php";
   $places = mysql_query("SELECT * FROM places WHERE approved='1' ORDER BY title");
   $places_total = mysql_num_rows($places);
   
-  echo '{ places: [';
+  echo '{ "places": [';
   
   while($place = mysql_fetch_assoc($places)) {
     $newplace = Array( );
