@@ -25,7 +25,7 @@
     );
     $newplace["geometry"] = Array(
       "type" => "Point",
-      "coordinates" => Array( $place[lat] * 1.000000, $place[lng] * 1.000000 )
+      "coordinates" => Array( $place[lng] * 1.0, $place[lat] * 1.0 )
     );
 
     if( $marker_id > 0 ){
