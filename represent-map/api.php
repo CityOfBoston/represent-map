@@ -11,15 +11,22 @@
   $places = mysql_query("SELECT * FROM places WHERE approved='1' ORDER BY title");
   $places_total = mysql_num_rows($places);
   
-  echo '{ "places": [';
+  echo '{ "type": "FeatureCollection", "features": [';
   
   while($place = mysql_fetch_assoc($places)) {
     $newplace = Array( );
-    $newplace["title"] = $_escape( $place[title] );
-    $newplace["description"] = $_escape( $place[description] );
-    $newplace["uri"] = $_escape( $place[uri] );
-    $newplace["address"] = $_escape( $place[address] );
-    $newplace["type"] = $_escape( $place[type] );
+    $newplace["type"] = "Feature";
+    $newplace["properties"] = Array(
+      "title" => $_escape( $place[title] ),
+      "description" => $_escape( $place[description] ),
+      "uri" => $_escape( $place[uri] ),
+      "address" => $_escape( $place[address] ),
+      "type" => $_escape( $place[type] )
+    );
+    $newplace["geometry"] = Array(
+      "type" => "Point",
+      "coordinates" => Array( $place[lat] * 1.000000, $place[lng] * 1.000000 )
+    );
 
     if( $marker_id > 0 ){
       echo ',';
