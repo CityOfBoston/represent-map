@@ -14,7 +14,7 @@ include_once "header.php";
     Create a map for your startup community!
     https://github.com/abenzer/represent-map
     -->
-    <title>represent.la - map of the Los Angeles startup community</title>
+    <title>Meet Boston Startups</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700|Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -26,7 +26,10 @@ include_once "header.php";
     <script src="./bootstrap/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
     <script src="./bootstrap/js/bootstrap-typeahead.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <!--
     <script type="text/javascript" src="./scripts/label.js"></script>
+    -->
+    <script type="text/javascript" src="./scripts/markerclusterer.js"></script>
     
     <script type="text/javascript">
       var map;
@@ -36,7 +39,8 @@ include_once "header.php";
       var highestZIndex = 0;  
       var agent = "default";
       var zoomControl = true;
-
+      var individualMarker = false;
+      var markerCluster;
 
       // detect browser agent
       $(document).ready(function(){
@@ -125,14 +129,15 @@ include_once "header.php";
               { saturation: 33 },
               { lightness: 20 }
             ]
-          }
+          },
+          { "featureType": "poi", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }
         ];
 
         // set map options
         var myOptions = {
-          zoom: 11,
-          //minZoom: 10,
-          center: new google.maps.LatLng(34.034453,-118.341293),
+          zoom: 14,
+          minZoom: 10,
+          center: new google.maps.LatLng( 42.356228,-71.035838 ),
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           streetViewControl: false,
           mapTypeControl: false,
@@ -148,36 +153,39 @@ include_once "header.php";
         zoomLevel = map.getZoom();
 
         // prepare infowindow
-        infowindow = new google.maps.InfoWindow({
-          content: "holding..."
-        });
+        infowindow = new google.maps.InfoWindow();
 
         // only show marker labels if zoomed in
+        /*
         google.maps.event.addListener(map, 'zoom_changed', function() {
           zoomLevel = map.getZoom();
-          if(zoomLevel <= 15) {
+          if(zoomLevel <= 17) {
             $(".marker_label").css("display", "none");
           } else {
             $(".marker_label").css("display", "inline");
           }
         });
+        */
 
         // markers array: name, type (icon), lat, long, description, uri, address
         markers = new Array();
         <?php
           $types = Array(
-              Array('startup', 'Startups'),
-              Array('accelerator','Accelerators'),
-              Array('incubator', 'Incubators'), 
-              Array('coworking', 'Coworking'), 
-              Array('investor', 'Investors'),
-              Array('service', 'Consulting'),
-              Array('hackerspace', 'Hackerspaces'),
-              Array('event', 'Events'),
+              Array('#e418ac', 'Innovation Spaces'),
+              Array('#bb25e2','Tech'),
+              Array('#6831e0', 'Creative'), 
+              Array('#3d57de', 'Life Science'),
+              Array('#49a8dd', 'Professional Services'),
+              Array('#54dbcb', 'Cultural and Educational'),
+              Array('#60d991', 'Showroom'),
+              Array('#73d76b', 'Institutional and Non-Profit'),
+              Array('#abd576', 'Industrial'),
+              Array('#d4d181', 'Food and Retail'),
+              Array('#d49779', 'Other')
               );
           $marker_id = 0;
           foreach($types as $type) {
-            $places = mysql_query("SELECT * FROM places WHERE approved='1' AND type='$type[0]' ORDER BY title");
+            $places = mysql_query("SELECT * FROM places WHERE approved='1' AND type='$type[1]' ORDER BY title");
             $places_total = mysql_num_rows($places);
             while($place = mysql_fetch_assoc($places)) {
               $place[title] = htmlspecialchars_decode(addslashes(htmlspecialchars($place[title])));
@@ -214,9 +222,6 @@ include_once "header.php";
 
         // add markers
         jQuery.each(markers, function(i, val) {
-          infowindow = new google.maps.InfoWindow({
-            content: ""
-          });
 
           // offset latlong ever so slightly to prevent marker overlap
           rand_x = Math.random();
@@ -232,6 +237,7 @@ include_once "header.php";
           }
 
           // build this marker
+          /*
           var markerImage = new google.maps.MarkerImage("./images/icons/"+val[1]+".png", null, null, null, iconSize);
           var marker = new google.maps.Marker({
             position: new google.maps.LatLng(val[2],val[3]),
@@ -242,11 +248,51 @@ include_once "header.php";
             zIndex: 10 + i,
             icon: markerImage
           });
+          */
+          var markerColor = {
+              'Innovation Spaces': '#e418ac',
+              'Tech': '#bb25e2',
+              'Creative': '#6831e0',
+              'Life Science': '#3d57de',
+              'Professional Services': '#49a8dd',
+              'Cultural and Educational': '#54dbcb',
+              'Showroom': '#60d991',
+              'Institutional and Non-Profit': '#73d76b',
+              'Industrial': '#abd576',
+              'Food and Retail': '#d4d181',
+              'Other': '#d49779'
+          };
+          var marker = new google.maps.Circle({
+            center: new google.maps.LatLng(val[2],val[3]),
+            // map: map,
+            clickable: true,
+            infoWindowHtml: '',
+            zIndex: 10 + i,
+            fillColor: markerColor[ val[1] ],
+            strokeColor: "#fff",
+            strokeOpacity: 0,
+            strokeWidth: 0,
+            fillOpacity: 0.5,
+            radius: 50
+          });
           marker.type = val[1];
           gmarkers.push(marker);
 
+/*
+          var shadowmarker = new google.maps.Marker({
+            position: new google.maps.LatLng(val[2],val[3]),
+            clickable: false,
+            infoWindowHtml: '',
+            zIndex: 10 + i,
+            icon: ' ',
+            map: map
+          });
+          gmarkers.push(shadowmarker);
+*/
+
           // add marker hover events (if not viewing on mobile)
           if(agent == "default") {
+            /*
             google.maps.event.addListener(marker, "mouseover", function() {
               this.old_ZIndex = this.getZIndex(); 
               this.setZIndex(9999); 
@@ -258,7 +304,8 @@ include_once "header.php";
                 this.setZIndex(this.old_ZIndex); 
                 $("#marker"+i).css("display", "none");
               }
-            }); 
+            });
+            */
           }
 
           // format marker URI for display and linking
@@ -270,29 +317,56 @@ include_once "header.php";
           var markerURI_short = markerURI_short.replace("www.", "");
 
           // add marker click effects (open infowindow)
-          google.maps.event.addListener(marker, 'click', function () {
-            infowindow.setContent(
-              "<div class='marker_title'>"+val[0]+"</div>"
-              + "<div class='marker_uri'><a target='_blank' href='"+markerURI+"'>"+markerURI_short+"</a></div>"
-              + "<div class='marker_desc'>"+val[4]+"</div>"
-              + "<div class='marker_address'>"+val[6]+"</div>"
-            );
-            infowindow.open(map, this);
+          google.maps.event.addListener(marker, 'click', function (){
+            var manyMarkers=getNearbyMarkers(marker.getCenter());
+            if((manyMarkers.length > 1 && !individualMarker) && ( manyMarkers.length != 2 || manyMarkers[0].id != manyMarkers[1].id )){
+              var pageViewer="<div style='min-width:280px;'><div style='margin-left:auto;margin-right:auto;'>Many at this location: <a href='#' onclick='map.setOptions({center:new google.maps.LatLng(" + marker.getCenter().lat() + ","+ marker.getCenter().lng() + "),zoom:"+(map.getZoom()+2)+"});infowindow.close();'>Zoom</a><br/>";
+              var tablesOn=false;
+              if(manyMarkers.length > 10){
+                tablesOn=true;
+                pageViewer+="<table><tr><td>";
+              }
+              pageViewer+="<ul>";
+              for(var mPt=0;mPt<manyMarkers.length;mPt++){
+                if((tablesOn)&&(mPt%10==0)&&(mPt!=0)){
+                  if(mPt > 30){break;}
+                  pageViewer+='</ul></td><td><ul>';
+                }
+                pageViewer+='<li><a href="#" onclick="openMarker('+manyMarkers[mPt].id+');return false;">'+markerTitles[ manyMarkers[mPt].id ]+'</a></li>';
+              }
+              pageViewer+="</ul>";
+              if(tablesOn){
+                pageViewer+="</td></tr></table>";
+              }
+              infowindow.setContent(pageViewer+"</div></div>");
+            }
+            else{
+              individualMarker = false;
+              infowindow.setContent(
+                "<div class='marker_title'>"+val[0]+"</div>"
+                + "<div class='marker_uri'><a target='_blank' href='"+markerURI+"'>"+markerURI_short+"</a></div>"
+                + "<div class='marker_desc'>"+val[4]+"</div>"
+                + "<div class='marker_address'>"+val[6]+"</div>"
+              );
+            }
+            infowindow.setPosition( marker.getCenter() );
+            infowindow.open(map);
           });
 
+/*
           // add marker label
           var latLng = new google.maps.LatLng(val[2], val[3]);
           var label = new Label({
             map: map,
             id: i
           });
-          label.bindTo('position', marker);
+          label.bindTo('position', shadowmarker);
           label.set("text", val[0]);
-          label.bindTo('visible', marker);
-          label.bindTo('clickable', marker);
-          label.bindTo('zIndex', marker);
+          label.bindTo('visible', shadowmarker);
+          label.bindTo('clickable', shadowmarker);
+          label.bindTo('zIndex', shadowmarker);
+*/
         });
-
 
         // zoom to marker if selected in search typeahead list
         $('#search').typeahead({
@@ -300,28 +374,74 @@ include_once "header.php";
           onselect: function(obj) {
             marker_id = jQuery.inArray(obj, markerTitles);
             if(marker_id > -1) {
-              map.panTo(gmarkers[marker_id].getPosition());
+              map.panTo(gmarkers[marker_id].getCenter());
               map.setZoom(15);
+              individualMarker = true;
               google.maps.event.trigger(gmarkers[marker_id], 'click');
             }
             $("#search").val("");
           }
         });
-      } 
+        
+        // change circle size on zoom
+        google.maps.event.addListener(map, 'zoom_changed', function(){
+          if(map.getZoom() > 14){
+            for(var i=0;i<gmarkers.length;i++){
+              if(typeof gmarkers[i].setRadius == "function"){
+                gmarkers[i].setRadius( Math.round( 50 / Math.pow( 2, (map.getZoom() - 14) / 2 ) ) );
+              }
+            }
+          }
+        });
+        
+        // close info window on map click
+        /*google.maps.event.addListener(map, 'click', function(){
+          infowindow.close();
+        });*/
+        
+        markerCluster = new MarkerClusterer(map, gmarkers);
+      }
 
+      function getNearbyMarkers(latlng){
+        var nMarkers=[];
+        var zoomFactor = 2.5 * Math.max(1, Math.pow(2,15-map.getZoom()) );
+        for(var mPt=0;mPt<gmarkers.length;mPt++){
+          if(!gmarkers[mPt].visible){
+            continue;
+          }
+          if( Math.abs(latlng.lat() - gmarkers[mPt].getCenter().lat()) < ( 0.0001 * zoomFactor )){
+            if( Math.abs(latlng.lng() - gmarkers[mPt].getCenter().lng()) < ( 0.0001 * zoomFactor )){
+              nMarkers.push({
+                marker: gmarkers[mPt],
+                id: mPt
+              });
+            }
+          }
+        }
+        return nMarkers;
+      }
+
+      // open specific marker
+      function openMarker(marker_id) {
+        if(marker_id) {
+          individualMarker = true;
+          google.maps.event.trigger(gmarkers[marker_id], 'click');
+        }
+      }
 
       // zoom to specific marker
       function goToMarker(marker_id) {
         if(marker_id) {
-          map.panTo(gmarkers[marker_id].getPosition());
-          map.setZoom(15);
+          map.panTo(gmarkers[marker_id].getCenter());
+          map.setZoom( Math.max(17, map.getZoom()) );
+          individualMarker = true;
           google.maps.event.trigger(gmarkers[marker_id], 'click');
         }
       }
 
       // toggle (hide/show) markers of a given type (on the map)
       function toggle(type) {
-        if($('#filter_'+type).is('.inactive')) {
+        if($('.filter_'+type.split(" ")[0]).is('.inactive')) {
           show(type); 
         } else {
           hide(type); 
@@ -335,7 +455,8 @@ include_once "header.php";
             gmarkers[i].setVisible(false);
           }
         }
-        $("#filter_"+type).addClass("inactive");
+        $(".filter_"+type.split(" ")[0]).addClass("inactive");
+        markerCluster.redraw();
       }
 
       // show all markers of a given type
@@ -345,14 +466,14 @@ include_once "header.php";
             gmarkers[i].setVisible(true);
           }
         }
-        $("#filter_"+type).removeClass("inactive");
+        $(".filter_"+type.split(" ")[0]).removeClass("inactive");
+        markerCluster.redraw();
       }
       
       // toggle (hide/show) marker list of a given type
       function toggleList(type) {
-        $("#list .list-"+type).toggle();
+        $(".list-"+type.split(" ")[0]).toggle();
       }
-
 
       // hover on list item
       function markerListMouseOver(marker_id) {
@@ -390,15 +511,15 @@ include_once "header.php";
       <div class="wrapper">
         <div class="right">
           <div class="share">
-            <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.represent.la" data-text="Let's put Los Angeles startups on the map:" data-via="representla" data-count="none">Tweet</a>
+            <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://bostonstartups.aws.af.cm/" data-text="Meet Boston's startups:" data-via="notifyboston" data-count="none">Tweet</a>
             <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-            <div class="fb-like" data-href="http://www.represent.la" data-send="false" data-layout="button_count" data-width="100" data-show-faces="false" data-font="arial"></div>
+            <div class="fb-like" data-href="http://bostonstartups.aws.af.cm/" data-send="false" data-layout="button_count" data-width="100" data-show-faces="false" data-font="arial"></div>
           </div>
         </div>
         <div class="left">
           <div class="logo">
             <a href="./">
-              <img src="images/logo.png" alt="" />
+              <img src="images/bostonlogo.png" style="height:42px;" alt="City of Boston" title="City of Boston" />
             </a>
           </div>
           <div class="buttons">
@@ -421,13 +542,17 @@ include_once "header.php";
       <ul class="list" id="list">
         <?php
           $types = Array(
-              Array('startup', 'Startups'),
-              Array('accelerator','Accelerators'),
-              Array('incubator', 'Incubators'), 
-              Array('coworking', 'Coworking'), 
-              Array('investor', 'Investors'),
-              Array('service', 'Consulting'),
-              Array('hackerspace', 'Hackerspaces')
+              Array('#e418ac', 'Innovation Spaces'),
+              Array('#bb25e2','Tech'),
+              Array('#6831e0', 'Creative'), 
+              Array('#3d57de', 'Life Science'), 
+              Array('#49a8dd', 'Professional Services'),
+              Array('#54dbcb', 'Cultural and Educational'),
+              Array('#60d991', 'Showroom'),
+              Array('#73d76b', 'Institutional and Non-Profit'),
+              Array('#abd576', 'Industrial'),
+              Array('#d4d181', 'Food and Retail'),
+              Array('#d49779', 'Other')
               );
           if($show_events == true) {
             $types[] = Array('event', 'Events'); 
@@ -435,7 +560,7 @@ include_once "header.php";
           $marker_id = 0;
           foreach($types as $type) {
             if($type[0] != "event") {
-              $markers = mysql_query("SELECT * FROM places WHERE approved='1' AND type='$type[0]' ORDER BY title");
+              $markers = mysql_query("SELECT * FROM places WHERE approved='1' AND type='$type[1]' ORDER BY title");
             } else {
               $markers = mysql_query("SELECT * FROM events WHERE start_date > ".time()." AND start_date < ".(time()+4838400)." ORDER BY id DESC");
             }
@@ -443,10 +568,10 @@ include_once "header.php";
             echo "
               <li class='category'>
                 <div class='category_item'>
-                  <div class='category_toggle' onClick=\"toggle('$type[0]')\" id='filter_$type[0]'></div>
-                  <a href='#' onClick=\"toggleList('$type[0]');\" class='category_info'><img src='./images/icons/$type[0].png' alt='' />$type[1]<span class='total'> ($markers_total)</span></a>
+                  <div class='category_toggle filter_$type[1]' onClick=\"toggle('$type[1]')\"></div>
+                  <a href='#' onClick=\"toggleList('$type[1]');\" class='category_info'><span style='background-color:$type[0];color:$type[0];margin-right:10px;'>___</span><small>$type[1]</small><span class='total'> ($markers_total)</span></a>
                 </div>
-                <ul class='list-items list-$type[0]'>
+                <ul class='list-items list-$type[1]'>
             ";
             while($marker = mysql_fetch_assoc($markers)) {
               echo "
@@ -463,8 +588,7 @@ include_once "header.php";
           }
         ?>
         <li class="blurb">
-          This map was made to connect and promote the Los Angeles tech startup community.
-          Let's put LA on the map!
+          This map was made to connect and promote the Boston tech startup community.
         </li>
         <li class="attribution">
           <!-- per our license, you may not remove this line -->
@@ -482,20 +606,20 @@ include_once "header.php";
       <div class="modal-body">
         <p>
           We built this map to connect and promote the tech startup community
-          in our beloved Los Angeles. We've seeded the map but we need
+          in Boston. We've seeded the map but we need
           your help to keep it fresh. If you don't see your company, please 
           <?php if($sg_enabled) { ?>
             <a href="#modal_add_choose" data-toggle="modal" data-dismiss="modal">submit it here</a>.
           <?php } else { ?>
             <a href="#modal_add" data-toggle="modal" data-dismiss="modal">submit it here</a>.
           <?php } ?>
-          Let's put LA on the map together!
+          Let's map Boston!
         </p>
         <p>
-          Questions? Feedback? Connect with us: <a href="http://www.twitter.com/representla" target="_blank">@representla</a>
+          Questions? Feedback? Connect with us: <a href="http://www.twitter.com/notifyboston" target="_blank">@notifyboston</a>
         </p>
         <p>
-          If you want to support the LA community by linking to this map from your website,
+          If you want to support the community by linking to this map from your website,
           here are some badges you might like to use. You can also grab the <a href="./images/badges/LA-icon.ai">LA icon AI file</a>.
         </p>
         <ul class="badges">
@@ -556,13 +680,17 @@ include_once "header.php";
               <label class="control-label" for="input01">Company Type</label>
               <div class="controls">
                 <select name="type" id="add_type" class="input-xlarge">
-                  <option value="startup">Startup</option>
-                  <option value="accelerator">Accelerator</option>
-                  <option value="incubator">Incubator</option>
-                  <option value="coworking">Coworking</option>
-                  <option value="investor">VC/Angel</option>
-                  <option value="service">Consulting Firm</option>
-                  <option value="hackerspace">Hackerspace</option>
+                  <option value="Professional Services">Professional Services</option>
+                  <option value="Tech">Tech</option>
+                  <option value="Showroom">Showroom</option>
+                  <option value="Life Science">Life Science</option>
+                  <option value="Industrial">Industrial</option>
+                  <option value="Creative">Creative</option>
+                  <option value="Cultural and Educational">Cultural and Educational</option>
+                  <option value="Food and Retail">Food and Retail</option>
+                  <option value="Innovation Spaces">Innovation Spaces</option>
+                  <option value="Institutional and Non-Profit">Institutional and Non-Profit</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
             </div>

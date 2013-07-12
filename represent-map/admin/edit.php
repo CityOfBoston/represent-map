@@ -60,13 +60,30 @@ if($task == "doedit") {
       <label class="control-label" for="">Type</label>
       <div class="controls">
         <select class="input input-xlarge" name="type">
-          <option<? if($place[type] == "startup") {?> selected="selected"<? } ?>>startup</option>
-          <option<? if($place[type] == "accelerator") {?> selected="selected"<? } ?>>accelerator</option>
-          <option<? if($place[type] == "incubator") {?> selected="selected"<? } ?>>incubator</option>
-          <option<? if($place[type] == "coworking") {?> selected="selected"<? } ?>>coworking</option>
-          <option<? if($place[type] == "food") {?> selected="selected"<? } ?>>food</option>
-          <option<? if($place[type] == "service") {?> selected="selected"<? } ?>>service</option>
-          <option<? if($place[type] == "hackerspace") {?> selected="selected"<? } ?>>hackerspace</option>
+
+              Array('#e418ac', 'Professional Services'),
+              Array('#bb25e2','Tech'),
+              Array('#6831e0', 'Showroom'), 
+              Array('#3d57de', 'Life Science'), 
+              Array('#49a8dd', 'Industrial'),
+              Array('#54dbcb', 'Creative'),
+              Array('#60d991', 'Cultural and Educational'),
+              Array('#73d76b', 'Food and Retail'),
+              Array('#abd576', 'Innovation Spaces'),
+              Array('#d4d181', 'Institutional and Non-Profit'),
+              Array('#d49779', 'Other')
+
+          <option<? if($place[type] == "Professional Services") {?> selected="selected"<? } ?>>Professional Services</option>
+          <option<? if($place[type] == "Tech") {?> selected="selected"<? } ?>>Tech</option>
+          <option<? if($place[type] == "Showroom") {?> selected="selected"<? } ?>>Showroom</option>
+          <option<? if($place[type] == "Life Science") {?> selected="selected"<? } ?>>Life Science</option>
+          <option<? if($place[type] == "Industrial") {?> selected="selected"<? } ?>>Industrial</option>
+          <option<? if($place[type] == "Creative") {?> selected="selected"<? } ?>>Creative</option>
+          <option<? if($place[type] == "Cultural and Educational") {?> selected="selected"<? } ?>>Cultural and Educational</option>
+          <option<? if($place[type] == "Food and Retail") {?> selected="selected"<? } ?>>Food and Retail</option>
+          <option<? if($place[type] == "Innovation Spaces") {?> selected="selected"<? } ?>>Innovation Spaces</option>
+          <option<? if($place[type] == "Institutional and Non-Profit") {?> selected="selected"<? } ?>>Institutional and Non-Profit</option>
+          <option<? if($place[type] == "Other") {?> selected="selected"<? } ?>>Other</option>
         </select>
       </div>
     </div>

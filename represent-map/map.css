@@ -176,7 +176,7 @@ html, body, #map_canvas
   top: 0;
   height: 100%;
   background-color: #fff;
-  width: 250px;
+  width: 325px;
 }
 .menu .blurb,
 .menu .attribution
@@ -245,7 +245,7 @@ html, body, #map_canvas
 }
 .list .category span
 {
-  opacity: .5;
+  opacity: 1; /* 0.5 */
 }
 .list .category .category_item
 {
