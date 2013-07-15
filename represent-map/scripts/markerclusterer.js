@@ -1055,8 +1055,17 @@ ClusterIcon.prototype.triggerClusterClick = function() {
   google.maps.event.trigger(markerClusterer, 'clusterclick', this.cluster_);
 
   if (markerClusterer.isZoomOnClick()) {
-    // Zoom into the cluster.
-    this.map_.fitBounds(this.cluster_.getBounds());
+    // Zoom into the cluster
+    var myBounds = this.cluster_.getBounds();
+    var south = myBounds.getSouthWest().lat() * 2 - myBounds.getCenter().lat();
+    var west = myBounds.getSouthWest().lng() * 2 - myBounds.getCenter().lng();
+    var north = myBounds.getNorthEast().lat() * 2 - myBounds.getCenter().lat();
+    var east = myBounds.getNorthEast().lng() * 2 - myBounds.getCenter().lng();
+    var newBounds = new google.maps.LatLngBounds(
+      new google.maps.LatLng( south, west ),
+      new google.maps.LatLng( north, east )
+    );
+    this.map_.fitBounds( newBounds );
   }
 };
 
