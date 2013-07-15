@@ -86,6 +86,7 @@ if($page != "login") {
             <input type='text' name='search' class='search-query' placeholder='Search' autocomplete='off' value='$search'>
           </form>
           <ul class='nav pull-right'>
+            <li><a href='upload.php'>&uarr; Upload</a></li>
             <li><a href='login.php?task=logout'>Sign Out</a></li>
           </ul>
         </div>

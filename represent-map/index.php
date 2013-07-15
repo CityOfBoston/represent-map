@@ -184,14 +184,26 @@ include_once "header.php";
               Array('#d49779', 'Other')
               );
           $marker_id = 0;
+          
+          $_linefix = function ($str){
+            $fix = explode('\r', $str);
+            $fix2 = explode('\n', $fix[0]);
+            return $fix2[0];
+          };
+          
           foreach($types as $type) {
             $places = mysql_query("SELECT * FROM places WHERE approved='1' AND type='$type[1]' ORDER BY title");
             $places_total = mysql_num_rows($places);
             while($place = mysql_fetch_assoc($places)) {
-              $place[title] = htmlspecialchars_decode(addslashes(htmlspecialchars($place[title])));
-              $place[description] = htmlspecialchars_decode(addslashes(htmlspecialchars($place[description])));
-              $place[uri] = addslashes(htmlspecialchars($place[uri]));
-              $place[address] = htmlspecialchars_decode(addslashes(htmlspecialchars($place[address])));
+              $place[title] = htmlspecialchars_decode(addslashes(htmlspecialchars($_linefix($place[title]))));
+              if($place[lat] == 0 && $place[lng] == 0){
+                // bad location
+                echo "/* bad location: " . $place[title] . " */";
+                continue;
+              }
+              $place[description] = htmlspecialchars_decode(addslashes(htmlspecialchars($_linefix($place[description]))));
+              $place[uri] = addslashes(htmlspecialchars($_linefix($place[uri])));
+              $place[address] = $_linefix(htmlspecialchars_decode(addslashes(htmlspecialchars($place[address]))));
               echo "
                 markers.push(['".$place[title]."', '".$place[type]."', '".$place[lat]."', '".$place[lng]."', '".$place[description]."', '".$place[uri]."', '".$place[address]."']); 
                 markerTitles[".$marker_id."] = '".$place[title]."';
@@ -514,6 +526,7 @@ include_once "header.php";
             <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://bostonstartups.aws.af.cm/" data-text="Meet Boston's startups:" data-via="notifyboston" data-count="none">Tweet</a>
             <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
             <div class="fb-like" data-href="http://bostonstartups.aws.af.cm/" data-send="false" data-layout="button_count" data-width="100" data-show-faces="false" data-font="arial"></div>
+            <a href="api.php" class="btn btn-inverse"><i class="icon-info-sign icon-white"></i>&nbsp;API</a>
           </div>
         </div>
         <div class="left">
