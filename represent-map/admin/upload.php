@@ -44,7 +44,7 @@ if($task == "doupload") {
           echo $addressfield . "<br/>";
         }
         else{
-          $placename = trim( $_escape($data[$namefield]) );
+          $placename = trim( $_escape( $data[$namefield] ) );
           $address = trim( str_replace( 'floor Boston', 'floor, Boston', $_escape($data[$addressfield]) ) );
           $address = explode( 'Boston, MA', $address );
           if( count($address) > 1 ){
@@ -57,7 +57,7 @@ if($task == "doupload") {
             continue;
           }
           
-          $place_query = mysql_query("SELECT * FROM places WHERE title='" . $placename . "' LIMIT 1");
+          $place_query = mysql_query("SELECT * FROM places WHERE title='$placename' LIMIT 1");
           if(mysql_num_rows($place_query) != 1) {
             //$place_query = mysql_query("SELECT * FROM places WHERE address='" . $_escape($data[$addressfield]) . "' LIMIT 1");
             //if(mysql_num_rows($place_query) != 1) {
