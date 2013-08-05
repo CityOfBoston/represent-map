@@ -3,17 +3,17 @@ include "header.php";
 
 if($task == "doupload") {
 
-  $name = $_FILES['csvfile']['name'];
+  $name = $_FILES["csvfile"]["name"];
 
   $_escape = function ($str){
-     $str = str_replace( '&', '&amp;', $str );
-     $str = str_replace( '\'', '&#039;', $str );
+     $str = str_replace( "&", "&amp;", $str );
+     $str = str_replace( "'", "&#039;", $str );
      return preg_replace("!([\b\t\n\r\f\"\\'])!", "\\\\\\1", $str);
   };
 
-  if ($_FILES['csvfile']['error'] == UPLOAD_ERR_OK  //checks for errors
-      && is_uploaded_file($_FILES['csvfile']['tmp_name'])) { //checks that file is uploaded
-    if (($handle = fopen( $_FILES['csvfile']['tmp_name'] , "r")) !== FALSE) {
+  if ($_FILES["csvfile"]["error"] == UPLOAD_ERR_OK  //checks for errors
+      && is_uploaded_file($_FILES["csvfile"]["tmp_name"])) { //checks that file is uploaded
+    if (($handle = fopen( $_FILES["csvfile"]["tmp_name"] , "r")) !== FALSE) {
       $row = 0;
       $fields = Array( );
       $namefield = 0;
@@ -45,15 +45,18 @@ if($task == "doupload") {
         }
         else{
           $placename = trim( $_escape( $data[$namefield] ) );
-          $address = trim( str_replace( 'floor Boston', 'floor, Boston', $_escape($data[$addressfield]) ) );
-          $address = explode( 'Boston, MA', $address );
+          $address = trim( str_replace( "floor Boston", "floor, Boston", $_escape($data[$addressfield]) ) );
+          $address = str_replace( "\r", "", $address );
+          $address = str_replace( "\n", ",", $address );
+          $address = explode( "Boston, MA", $address );
           if( count($address) > 1 ){
-            $address = $address[0] . 'Boston, MA';
+            $address = $address[0] . "Boston, MA";
           }
           else{
             $address = $address[0];
           }
-          if($placename == '' || $address == ''){
+          
+          if($placename == "" || $address == ""){
             continue;
           }
           
@@ -61,22 +64,20 @@ if($task == "doupload") {
           if(mysql_num_rows($place_query) != 1) {
             //$place_query = mysql_query("SELECT * FROM places WHERE address='" . $_escape($data[$addressfield]) . "' LIMIT 1");
             //if(mysql_num_rows($place_query) != 1) {
-            echo 'new: ';
+            echo "new: ";
             $num = count($data);
             for ($c=0; $c < $num; $c++) {
               echo $fields[$c] . " = " . $data[$c];
             } 
-            echo '<br/>';           
+            echo "<br/>";
             //}
 
             $type = $data[$typefield];
-            $description = explode( '\r', $data[$descriptionfield] );
-            $description = explode( '\n', $description[0] );
-            $description = $_escape($description[0]);
+            $description = $_escape($data[$descriptionfield]);
 
-            $uri = '';
-            $owner_name = '';
-            $owner_email = '';
+            $uri = "";
+            $owner_name = "";
+            $owner_email = "";
 
             $insert = mysql_query("INSERT INTO places (approved, title, type, address, uri, description, owner_name, owner_email) VALUES (1, '$placename', '$type', '$address', '$uri', '$description', '$owner_name', '$owner_email')") or die(mysql_error());
 
@@ -88,16 +89,16 @@ if($task == "doupload") {
           }
           $place = mysql_fetch_assoc($place_query);
 
-          if( $place['address'] != $data[$addressfield] ){
-            echo 'update address: ';
+          if( $place["address"] != $data[$addressfield] ){
+            echo "update address: ";
             $num = count($data);
             for ($c=0; $c < $num; $c++) {
               echo $fields[$c] . " = " . $data[$c];
             } 
-            echo '<br/>';   
+            echo "<br/>";   
           }
           else{
-            echo 'match<br/>';
+            echo "match<br/>";
           }
         }
         $row++;
