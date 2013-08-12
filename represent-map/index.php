@@ -20,16 +20,15 @@ include_once "header.php";
     <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700|Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link href="./bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css" />
     <link href="./bootstrap/css/bootstrap-responsive.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="map.css?nocache=289671982568" type="text/css" />
+    <link rel="stylesheet" href="map.css" type="text/css" />
     <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="mobile.css" type="text/css" />
+    <link rel="stylesheet" href="datepicker.css" type="text/css" />
     <script src="./scripts/jquery-1.7.1.js" type="text/javascript" charset="utf-8"></script>
     <script src="./bootstrap/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
     <script src="./bootstrap/js/bootstrap-typeahead.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
-    <!--
-    <script type="text/javascript" src="./scripts/label.js"></script>
-    -->
     <script type="text/javascript" src="./scripts/markerclusterer.js"></script>
+    <script type="text/javascript" src="./scripts/bootstrap-datepicker.js"></script>
     
     <script type="text/javascript">
       var map;
@@ -135,9 +134,9 @@ include_once "header.php";
 
         // set map options
         var myOptions = {
-          zoom: 14,
+          zoom: 15,
           minZoom: 10,
-          center: new google.maps.LatLng( 42.356228,-71.035838 ),
+          center: new google.maps.LatLng( 42.34933,-71.032469 ),
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           streetViewControl: false,
           mapTypeControl: false,
@@ -150,22 +149,26 @@ include_once "header.php";
           }
         };
         map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);
+        
+        map.fitBounds( new google.maps.LatLngBounds( new google.maps.LatLng(42.343472, -71.05295), new google.maps.LatLng(42.354699, -71.015) ) );
+        
+        var osmMapLayer = new google.maps.ImageMapType({
+          getTileUrl: function(coord, zoom) {
+            return "http://tiles1.skobbler.net/osm_tiles2/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
+          },
+          tileSize: new google.maps.Size(256, 256),
+          isPng: true,
+          alt: "Skobbler GmbH",
+          name: "Skobbler GmbH",
+          maxZoom: 19
+        });
+        map.mapTypes.set('Skobbler',osmMapLayer);
+        map.setMapTypeId('Skobbler');
+
         zoomLevel = map.getZoom();
 
         // prepare infowindow
         infowindow = new google.maps.InfoWindow();
-
-        // only show marker labels if zoomed in
-        /*
-        google.maps.event.addListener(map, 'zoom_changed', function() {
-          zoomLevel = map.getZoom();
-          if(zoomLevel <= 17) {
-            $(".marker_label").css("display", "none");
-          } else {
-            $(".marker_label").css("display", "inline");
-          }
-        });
-        */
 
         // markers array: name, type (icon), lat, long, description, uri, address
         markers = new Array();
@@ -186,10 +189,19 @@ include_once "header.php";
           $marker_id = 0;
           
           $_linefix = function ($str){
-            $fix = explode('\r', $str);
-            $fix2 = explode('\n', $fix[0]);
-            return $fix2[0];
-          };
+            $str = str_replace( "\r", "<br>", $str );
+            $str = str_replace( "\n", "<br>", $str );
+            $firstwords = explode( $str, " " );
+            if( sizeof( $firstwords ) > 4 ){
+              $firstwords = $firstwords[0] . " " . $firstwords[1];
+              if(strpos( $str, $firstwords ) < strrpos( $str, $firstwords ) ){
+                // assume a repeat
+                $str = explode( $str, $firstwords );
+                $str = $firstwords . $str[0];
+              }
+            }
+            return $str;
+         };
           
           foreach($types as $type) {
             $places = mysql_query("SELECT * FROM places WHERE approved='1' AND type='$type[1]' ORDER BY title");
@@ -203,15 +215,16 @@ include_once "header.php";
               }
               $place[description] = htmlspecialchars_decode(addslashes(htmlspecialchars($_linefix($place[description]))));
               $place[uri] = addslashes(htmlspecialchars($_linefix($place[uri])));
-              $place[address] = $_linefix(htmlspecialchars_decode(addslashes(htmlspecialchars($place[address]))));
+              $place[address] = htmlspecialchars_decode(addslashes(htmlspecialchars($_linefix($place[address]))));
               echo "
-                markers.push(['".$place[title]."', '".$place[type]."', '".$place[lat]."', '".$place[lng]."', '".$place[description]."', '".$place[uri]."', '".$place[address]."']); 
+                markers.push(['".$place[title]."', '".$place[type]."', '".$place[lat]."', '".$place[lng]."', '".$place[description]."', '".$place[uri]."', '".$place[address]."', ".$place[id].", '".$place[hiring]."', '".$place[hirelink]."']); 
                 markerTitles[".$marker_id."] = '".$place[title]."';
               "; 
               $count[$place[type]]++;
               $marker_id++;
             }
-          } 
+          }
+          /* 
           if($show_events == true) {
             $place[type] = "event";
             $events = mysql_query("SELECT * FROM events WHERE start_date > ".time()." AND start_date < ".(time()+4838400)." ORDER BY id DESC");
@@ -230,6 +243,7 @@ include_once "header.php";
               $marker_id++;
             }
           }
+          */
         ?>
 
         // add markers
@@ -248,19 +262,6 @@ include_once "header.php";
             iconSize = null;
           }
 
-          // build this marker
-          /*
-          var markerImage = new google.maps.MarkerImage("./images/icons/"+val[1]+".png", null, null, null, iconSize);
-          var marker = new google.maps.Marker({
-            position: new google.maps.LatLng(val[2],val[3]),
-            map: map,
-            title: '',
-            clickable: true,
-            infoWindowHtml: '',
-            zIndex: 10 + i,
-            icon: markerImage
-          });
-          */
           var markerColor = {
               'Innovation Spaces': '#e418ac',
               'Tech': '#bb25e2',
@@ -289,36 +290,6 @@ include_once "header.php";
           });
           marker.type = val[1];
           gmarkers.push(marker);
-
-/*
-          var shadowmarker = new google.maps.Marker({
-            position: new google.maps.LatLng(val[2],val[3]),
-            clickable: false,
-            infoWindowHtml: '',
-            zIndex: 10 + i,
-            icon: ' ',
-            map: map
-          });
-          gmarkers.push(shadowmarker);
-*/
-
-          // add marker hover events (if not viewing on mobile)
-          if(agent == "default") {
-            /*
-            google.maps.event.addListener(marker, "mouseover", function() {
-              this.old_ZIndex = this.getZIndex(); 
-              this.setZIndex(9999); 
-              $("#marker"+i).css("display", "inline");
-              $("#marker"+i).css("z-index", "99999");
-            });
-            google.maps.event.addListener(marker, "mouseout", function() { 
-              if (this.old_ZIndex && zoomLevel <= 15) {
-                this.setZIndex(this.old_ZIndex); 
-                $("#marker"+i).css("display", "none");
-              }
-            });
-            */
-          }
 
           // format marker URI for display and linking
           var markerURI = val[5];
@@ -354,36 +325,32 @@ include_once "header.php";
             }
             else{
               individualMarker = false;
-              infowindow.setContent(
-                "<div class='marker_title'>"+val[0]+"</div>"
+              var content = "<div class='marker_title'>"+val[0]+"</div>"
                 + "<div class='marker_uri'><a target='_blank' href='"+markerURI+"'>"+markerURI_short+"</a></div>"
-                + "<div class='marker_desc'>"+val[4]+"</div>"
-                + "<div class='marker_address'>"+val[6]+"</div>"
-              );
+                + "<div class='marker_desc'>"+val[4]+"</div>";
+                
+              // check for hiring info
+              var dbid = val[7];
+              var hiring = val[8];
+              var hirelink = val[9];
+              if(hiring && hiring.length && hiring == '2'){
+                // approved job link
+                content += "<div class='hiring'><a href='" + hirelink + "' target='_blank'>Hiring Now!</a></div>";
+              }
+              
+              content += "<div class='marker_address'>"+val[6]+"</div>";
+              
+              infowindow.setContent(content);
             }
             infowindow.setPosition( marker.getCenter() );
             infowindow.open(map);
           });
-
-/*
-          // add marker label
-          var latLng = new google.maps.LatLng(val[2], val[3]);
-          var label = new Label({
-            map: map,
-            id: i
-          });
-          label.bindTo('position', shadowmarker);
-          label.set("text", val[0]);
-          label.bindTo('visible', shadowmarker);
-          label.bindTo('clickable', shadowmarker);
-          label.bindTo('zIndex', shadowmarker);
-*/
         });
 
         // zoom to marker if selected in search typeahead list
         $('#search').typeahead({
           source: markerTitles, 
-          onselect: function(obj) {
+          onselect: function(obj, obj2) {
             marker_id = jQuery.inArray(obj, markerTitles);
             if(marker_id > -1) {
               map.panTo(gmarkers[marker_id].getCenter());
@@ -393,6 +360,27 @@ include_once "header.php";
             }
             $("#search").val("");
           }
+        });
+        $('.searchbar').typeahead({
+          source: markerTitles, 
+          onselect: function(obj) {
+            marker_id = jQuery.inArray(obj, markerTitles);
+            if(marker_id > -1){
+              $('#searchoutcome').val( markers[marker_id][7] );
+              $('#jobsubmit')[0].disabled = false;
+              $('#jobsubmit').removeClass("disabled");
+            }
+          }
+        });
+        $('#hiredate').datepicker({
+          format: 'mm-dd-yyyy',
+          startDate: new Date(),
+          endDate: new Date( (new Date()) * 1 + 365 * 24 * 60 * 60 * 1000 ),
+          todayHighlight: true,
+          autoclose: true
+        })
+        .on('changeDate', function(ev){
+          $('#unixhiredate').val( (new Date($('#hiredate').val()) * 1) );
         });
         
         // change circle size on zoom
@@ -406,12 +394,7 @@ include_once "header.php";
           }
         });
         
-        // close info window on map click
-        /*google.maps.event.addListener(map, 'click', function(){
-          infowindow.close();
-        });*/
-        
-        markerCluster = new MarkerClusterer(map, gmarkers);
+        markerCluster = new MarkerClusterer(map, gmarkers, { zoomOnClick: false });
       }
 
       function getNearbyMarkers(latlng){
@@ -535,13 +518,14 @@ include_once "header.php";
               <img src="images/bostonlogo.png" style="height:42px;" alt="City of Boston" title="City of Boston" />
             </a>
           </div>
+          <div class="logo logo2">
+            <strong>Boston's Innovation District</strong>          
+          </div>
           <div class="buttons">
+            <a href="#modal_add" class="btn btn-large btn-success" data-toggle="modal"><i class="icon-plus-sign icon-white"></i>Add Company</a>
+            <a href="#modal_jobs" class="btn btn-large btn-success" data-toggle="modal"><i class="icon-plus-sign icon-white"></i>Add Job</a>
             <a href="#modal_info" class="btn btn-large btn-info" data-toggle="modal"><i class="icon-info-sign icon-white"></i>About this Map</a>
-            <?php if($sg_enabled) { ?>
-              <a href="#modal_add_choose" class="btn btn-large btn-success" data-toggle="modal"><i class="icon-plus-sign icon-white"></i>Add Something</a>
-            <? } else { ?>
-              <a href="#modal_add" class="btn btn-large btn-success" data-toggle="modal"><i class="icon-plus-sign icon-white"></i>Add Something</a>
-            <? } ?>
+
           </div>
           <div class="search">
             <input type="text" name="search" id="search" placeholder="Search for companies..." data-provide="typeahead" autocomplete="off" />
@@ -567,9 +551,11 @@ include_once "header.php";
               Array('#d4d181', 'Food and Retail'),
               Array('#d49779', 'Other')
               );
+          /*
           if($show_events == true) {
             $types[] = Array('event', 'Events'); 
           }
+          */
           $marker_id = 0;
           foreach($types as $type) {
             if($type[0] != "event") {
@@ -617,43 +603,16 @@ include_once "header.php";
         <h3>About this Map</h3>
       </div>
       <div class="modal-body">
-        <p>
-          We built this map to connect and promote the tech startup community
-          in Boston. We've seeded the map but we need
-          your help to keep it fresh. If you don't see your company, please 
-          <?php if($sg_enabled) { ?>
-            <a href="#modal_add_choose" data-toggle="modal" data-dismiss="modal">submit it here</a>.
-          <?php } else { ?>
-            <a href="#modal_add" data-toggle="modal" data-dismiss="modal">submit it here</a>.
-          <?php } ?>
-          Let's map Boston!
-        </p>
-        <p>
-          Questions? Feedback? Connect with us: <a href="http://www.twitter.com/notifyboston" target="_blank">@notifyboston</a>
-        </p>
-        <p>
-          If you want to support the community by linking to this map from your website,
-          here are some badges you might like to use. You can also grab the <a href="./images/badges/LA-icon.ai">LA icon AI file</a>.
-        </p>
-        <ul class="badges">
-          <li>
-            <img src="./images/badges/badge1.png" alt="">
-          </li>
-          <li>
-            <img src="./images/badges/badge1_small.png" alt="">
-          </li>
-          <li>
-            <img src="./images/badges/badge2.png" alt="">
-          </li>
-          <li>
-            <img src="./images/badges/badge2_small.png" alt="">
-          </li>
+        <p>Welcome! We built this map to help build connections in Boston’s growing Innovation District. The Innovation District is Mayor Thomas M. Menino's initiative to transform 1,000 acres of the South Boston waterfront into an urban environment that fosters innovation, collaboration, and entrepreneurship. From a tech meet-up at a co-working space to an art exhibition, or the launch of a new start-up or a special chef's event at a local restaurant, the Innovation District is expanding quickly across a variety of sectors.</p>
+        <p>We intend this map to be your guide to all of the great resources the Innovation District has to offer. Whether you want to explore an industry as a whole, find a specific company, or just browse for a new lunch spot, this map is for you. Additional layers of data can give you insight into future development projects, new housing options, and other amenities currently in place in our district.</p>
+        <p>Want to know where to start? Here’s a few ways you can use this map:
+        <ul>
+          <li>Explore your surroundings. Discover everything your neighbors and community have to offer. Visit our map here.</li>
+          <li>Find a job. Love to collaborate and create? We're always looking for people to join our innovation community.  Use this map to see which companies are currently hiring.</li>
+          <li>Add your company. Don’t see your business currently listed? Keep our map fresh and submit your information here.</li>
         </ul>
-        <p>
-          This map was built with <a href="https://github.com/abenzer/represent-map">RepresentMap</a> - an open source project we started
-          to help startup communities around the world create their own maps. 
-          Check out some <a target="_blank" href="http://www.representmap.com">startup maps</a> built by other communities!
         </p>
+        <p>Questions? Feedback? Connect with us: <a href="http://www.innovationdistrict.org/contact/" target="_blank">http://www.innovationdistrict.org/contact/</a></p>
       </div>
       <div class="modal-footer">
         <a href="#" class="btn" data-dismiss="modal" style="float: right;">Close</a>
@@ -780,42 +739,109 @@ include_once "header.php";
         );
       });
     </script>
-    
-    <!-- startup genome modal -->
-    <div class="modal hide" id="modal_add_choose">
-      <form action="add.php" id="modal_addform_choose" class="form-horizontal">
+
+    <!-- add job modal -->
+    <div class="modal hide" id="modal_jobs">
+      <form action="addhiring.php" id="modal_addjob" class="form-horizontal">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">×</button>
-          <h3>Add something!</h3>
+          <h3>You're hiring!</h3>
         </div>
         <div class="modal-body">
-          <p>
-            Want to add your company to this map? There are two easy ways to do that.
-          </p>
-          <ul>
-            <li>
-              <em>Option #1: Add your company to Startup Genome</em>
-              <div>
-                Our map pulls its data from <a href="http://www.startupgenome.com">Startup Genome</a>.
-                When you add your company to Startup Genome, it will appear on this map after it has been approved.
-                You will be able to change your company's information anytime you want from the Startup Genome website.
+          <div id="result"></div>
+          <fieldset>
+            <div class="control-group">
+              <label class="control-label" for="add_title">Company Name</label>
+              <div class="controls">
+                <div class="search">
+                  <input id="searchoutcome" type="hidden" name="id" value=""/>
+                  <input type="text" class="searchbar" placeholder="Search for companies..." data-provide="typeahead" autocomplete="off" />
+                </div>
+                <p class="help-block">
+                  Your company must be added to the map first!
+                </p>
               </div>
-              <br />
-              <a href="http://www.startupgenome.com" target="_blank" class="btn btn-info">Sign in to Startup Genome</a>
-            </li>
-            <li>
-              <em>Option #2: Add your company manually</em>
-              <div>
-                If you don't want to sign up for Startup Genome, you can still add your company to this map.
-                We will review your submission as soon as possible.
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="add_owner_name">Your Name</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" name="owner_name" id="add_owner_name" maxlength="100">
               </div>
-              <br />
-          <a href="#modal_add" target="_blank" class="btn btn-info" data-toggle="modal" data-dismiss="modal">Submit your company manually</a>
-            </li>
-          </ul>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="add_owner_email">Your Email</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" name="owner_email" id="add_owner_email" maxlength="100">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="add_uri">Job URL</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" id="hirelink" name="hirelink" placeholder="http://">
+                <p class="help-block">
+                  Should be a link to your careers page, including http:// "http://www.yoursite.com/careers"
+                </p>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="add_uri">Hire date</label>
+              <div class="controls">
+                <input id="unixhiredate" type="hidden" name="hiredate"/>
+                <input type="text" id="hiredate"/>
+                <p class="help-block">
+                  We'll review the job and list it on the site. When should we stop listing the job?
+                </p>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button id="jobsubmit" type="submit" disabled="disabled" class="btn btn-primary disabled">Submit for Review</button>
+          <a href="#" class="btn" data-dismiss="modal" style="float: right;">Close</a>
         </div>
       </form>
     </div>
+    <script>
+      // add modal form submit
+      $("#modal_addjob").submit(function(event) {
+        event.preventDefault(); 
+        // get values
+        var $form = $( this ),
+            //owner_name = $form.find( '#job_owner_name' ).val(),
+            //owner_email = $form.find( '#job_owner_email' ).val(),
+            id = $form.find( '#searchoutcome' ).val(),
+            hirelink = $form.find( '#hirelink' ).val(),
+            hiredate = $form.find( '#unixhiredate' ).val(),            
+            url = $form.attr( 'action' );
+
+        // send data and get results
+        $.post( url,
+          {
+            id: id,
+            hirelink: hirelink,
+            hiredate: hiredate
+          },
+          function( data ) {
+            console.log( data );
+            var content = $( data ).find( '#content' );
+            
+            // if submission was successful, show info alert
+            if(data == "success") {
+              $("#modal_addjob #result").html("We've received your submission and will review it shortly. Thanks!"); 
+              $("#modal_addjob #result").addClass("alert alert-info");
+              $("#modal_addjob p").css("display", "none");
+              $("#modal_addjob fieldset").css("display", "none");
+              $("#modal_addjob .btn-primary").css("display", "none");
+              
+            // if submission failed, show error
+            } else {
+              $("#modal_addjob #result").html(data); 
+              $("#modal_addjob #result").addClass("alert alert-danger");
+            }
+          }
+        );
+      });
+    </script>
     
   </body>
 </html>

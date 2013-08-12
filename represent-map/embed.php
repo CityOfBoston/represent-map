@@ -100,9 +100,9 @@ include_once "header.php";
 
         // set map options
         var myOptions = {
-          zoom: 14,
+          zoom: 15,
           minZoom: 10,
-          center: new google.maps.LatLng( 42.356228,-71.035838 ),
+          center: new google.maps.LatLng( 42.34933,-71.032469 ),
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           streetViewControl: false,
           mapTypeControl: false,
@@ -111,6 +111,8 @@ include_once "header.php";
           styles: mapStyles
         };
         map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);
+
+        map.fitBounds( new google.maps.LatLngBounds( new google.maps.LatLng(42.343472, -71.05295), new google.maps.LatLng(42.354699, -71.015) ) );
         
         var osmMapLayer = new google.maps.ImageMapType({
           getTileUrl: function(coord, zoom) {

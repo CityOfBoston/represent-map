@@ -91,6 +91,11 @@ html, body, #map_canvas
 .topbar .logo a
 {
   display: inline-block;
+  *display: inline;
+  zoom: 1;
+}
+.topbar .logo2{
+  margin-top: -9px;
 }
 .topbar .logo a img
 {
@@ -141,6 +146,8 @@ html, body, #map_canvas
 .topbar .share iframe
 {
   display: inline-block;
+  *display: inline;
+  zoom: 1;
   vertical-align: middle;
   margin-right: 2px;
 }
@@ -437,7 +444,13 @@ html, body, #map_canvas
 /* get info modal */
 #modal_info
 {
-  margin-top: -350px;
+  margin-top: -300px;
+}
+#modal_info ul{
+  margin-left: 15px;
+}
+#modal_info ul, #modal_info li{
+  list-style-type: disc;
 }
 #modal_info .modal-body
 {
@@ -451,6 +464,8 @@ html, body, #map_canvas
 #modal_info .connect span
 {
   display: inline-block;
+  *display: inline;
+  zoom: 1;
   vertical-align: middle;
 }
 #modal_info .connect span
@@ -468,6 +483,8 @@ html, body, #map_canvas
 #modal_info .badges li
 {
   display: inline-block;
+  *display: inline;
+  zoom: 1;
   vertical-align: middle;
   margin: 10px;
 }
@@ -502,4 +519,11 @@ html, body, #map_canvas
   padding: .7em 1em;
   border-radius: 7px;
   border: 2px dashed rgba(255,0,0,.6);
+}
+
+.hiring{
+  padding: 5px;
+  background-color: #FFD700;
+  text-align: center;
+  width: 100px;
 }

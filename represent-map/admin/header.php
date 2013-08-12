@@ -35,6 +35,8 @@ mysql_select_db($db_name) or die(mysql_error());
 $total_approved = mysql_num_rows(mysql_query("SELECT id FROM places WHERE approved='1'"));
 $total_rejected = mysql_num_rows(mysql_query("SELECT id FROM places WHERE approved='0'"));
 $total_pending = mysql_num_rows(mysql_query("SELECT id FROM places WHERE approved IS null"));
+$total_hiring = mysql_num_rows(mysql_query("SELECT id FROM places WHERE hiring=2"));
+$total_pendinghiring = mysql_num_rows(mysql_query("SELECT id FROM places WHERE hiring=1"));
 $total_all = mysql_num_rows(mysql_query("SELECT id FROM places"));
 
 // admin header
@@ -56,9 +58,6 @@ if($page != "login") {
     <div class='navbar navbar-fixed-top'>
       <div class='navbar-inner'>
         <div class='container'>
-          <a class='brand' href='index.php'>
-            RepresentMap
-          </a>
           <ul class='nav'>
             <li"; if($view == "") { $admin_head .= " class='active'"; } $admin_head .= ">
               <a href='index.php'>All Listings</a>
@@ -73,6 +72,18 @@ if($page != "login") {
               <a href='index.php?view=pending'>
                 Pending
                 <span class='badge badge-info'>$total_pending</span>
+              </a>
+            </li>
+            <li"; if($view == "pendinghiring") { $admin_head .= " class='active'"; } $admin_head .= ">
+              <a href='hiring.php?view=pendinghiring'>
+                Potential Hiring
+                <span class='badge badge-info'>$total_pendinghiring</span>
+              </a>
+            </li>
+            <li"; if($view == "hiring") { $admin_head .= " class='active'"; } $admin_head .= ">
+              <a href='hiring.php?view=hiring'>
+                Hiring
+                <span class='badge badge-info'>$total_hiring</span>
               </a>
             </li>
             <li"; if($view == "rejected") { $admin_head .= " class='active'"; } $admin_head .= ">
