@@ -63,7 +63,6 @@ if($task == "doedit") {
 
               Array('#e418ac', 'Professional Services'),
               Array('#bb25e2','Tech'),
-              Array('#6831e0', 'Showroom'), 
               Array('#3d57de', 'Life Science'), 
               Array('#49a8dd', 'Industrial'),
               Array('#54dbcb', 'Creative'),
@@ -75,7 +74,6 @@ if($task == "doedit") {
 
           <option<? if($place[type] == "Professional Services") {?> selected="selected"<? } ?>>Professional Services</option>
           <option<? if($place[type] == "Tech") {?> selected="selected"<? } ?>>Tech</option>
-          <option<? if($place[type] == "Showroom") {?> selected="selected"<? } ?>>Showroom</option>
           <option<? if($place[type] == "Life Science") {?> selected="selected"<? } ?>>Life Science</option>
           <option<? if($place[type] == "Industrial") {?> selected="selected"<? } ?>>Industrial</option>
           <option<? if($place[type] == "Creative") {?> selected="selected"<? } ?>>Creative</option>
@@ -115,6 +113,12 @@ if($task == "doedit") {
       <label class="control-label" for="">Submitter Email</label>
       <div class="controls">
         <input type="text" class="input input-xlarge" name="owner_email" value="<?=$place[owner_email]?>" id="">
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="">Number of Employees</label>
+      <div class="controls">
+        <input type="text" class="input input-large" name="numemployees" value="<?=$place[numemployees]?>" id="">
       </div>
     </div>
     <div class="control-group">

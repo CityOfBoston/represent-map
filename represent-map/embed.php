@@ -142,10 +142,9 @@ include_once "header.php";
               Array('#3d57de', 'Life Science'),
               Array('#49a8dd', 'Professional Services'),
               Array('#54dbcb', 'Cultural and Educational'),
-              Array('#60d991', 'Showroom'),
+              Array('#60d991', 'Food and Retail'),
               Array('#73d76b', 'Institutional and Non-Profit'),
               Array('#abd576', 'Industrial'),
-              Array('#d4d181', 'Food and Retail'),
               Array('#d49779', 'Other')
               );
           $marker_id = 0;
@@ -211,10 +210,9 @@ include_once "header.php";
               'Life Science': '#3d57de',
               'Professional Services': '#49a8dd',
               'Cultural and Educational': '#54dbcb',
-              'Showroom': '#60d991',
+              'Food and Retail': '#60d991',
               'Institutional and Non-Profit': '#73d76b',
               'Industrial': '#abd576',
-              'Food and Retail': '#d4d181',
               'Other': '#d49779'
           };
           var marker = new google.maps.Circle({

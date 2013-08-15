@@ -180,10 +180,10 @@ include_once "header.php";
               Array('#3d57de', 'Life Science'),
               Array('#49a8dd', 'Professional Services'),
               Array('#54dbcb', 'Cultural and Educational'),
-              Array('#60d991', 'Showroom'),
+              Array('#60d991', 'Food and Retail'),
               Array('#73d76b', 'Institutional and Non-Profit'),
               Array('#abd576', 'Industrial'),
-              Array('#d4d181', 'Food and Retail'),
+              /* Array('#d4d181', 'Food and Retail'), */
               Array('#d49779', 'Other')
               );
           $marker_id = 0;
@@ -269,12 +269,14 @@ include_once "header.php";
               'Life Science': '#3d57de',
               'Professional Services': '#49a8dd',
               'Cultural and Educational': '#54dbcb',
-              'Showroom': '#60d991',
+              'Food and Retail': '#60d991',
               'Institutional and Non-Profit': '#73d76b',
               'Industrial': '#abd576',
-              'Food and Retail': '#d4d181',
               'Other': '#d49779'
           };
+          if(val[1] == "other" || typeof markerColor[val[1]] == "undefined"){
+            val[1] = "Other";
+          }
           var marker = new google.maps.Circle({
             center: new google.maps.LatLng(val[2],val[3]),
             // map: map,
@@ -545,10 +547,9 @@ include_once "header.php";
               Array('#3d57de', 'Life Science'), 
               Array('#49a8dd', 'Professional Services'),
               Array('#54dbcb', 'Cultural and Educational'),
-              Array('#60d991', 'Showroom'),
+              Array('#60d991', 'Food and Retail'),
               Array('#73d76b', 'Institutional and Non-Profit'),
               Array('#abd576', 'Industrial'),
-              Array('#d4d181', 'Food and Retail'),
               Array('#d49779', 'Other')
               );
           /*
@@ -654,7 +655,6 @@ include_once "header.php";
                 <select name="type" id="add_type" class="input-xlarge">
                   <option value="Professional Services">Professional Services</option>
                   <option value="Tech">Tech</option>
-                  <option value="Showroom">Showroom</option>
                   <option value="Life Science">Life Science</option>
                   <option value="Industrial">Industrial</option>
                   <option value="Creative">Creative</option>
@@ -681,8 +681,14 @@ include_once "header.php";
               <div class="controls">
                 <input type="text" class="input-xlarge" id="add_uri" name="uri" placeholder="http://">
                 <p class="help-block">
-                  Should be your full URL with no trailing slash, e.g. "http://www.yoursite.com"
+                  Your full URL e.g. "http://www.yoursite.com"
                 </p>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="add_uri">Number of Employees</label>
+              <div class="controls">
+                <input type="text" class="input-large" id="employeenum" name="employeenum"/>
               </div>
             </div>
             <div class="control-group">
@@ -690,7 +696,7 @@ include_once "header.php";
               <div class="controls">
                 <input type="text" class="input-xlarge" id="add_description" name="description" maxlength="150">
                 <p class="help-block">
-                  Brief, concise description. What's your product? What problem do you solve? Max 150 chars.
+                  Brief, concise description. Max 150 chars.
                 </p>
               </div>
             </div>
@@ -715,10 +721,11 @@ include_once "header.php";
             address = $form.find( '#add_address' ).val(),
             uri = $form.find( '#add_uri' ).val(),
             description = $form.find( '#add_description' ).val(),
+            employeenum = $form.find( '#employeenum' ).val(),
             url = $form.attr( 'action' );
 
         // send data and get results
-        $.post( url, { owner_name: owner_name, owner_email: owner_email, title: title, type: type, address: address, uri: uri, description: description },
+        $.post( url, { owner_name: owner_name, owner_email: owner_email, title: title, type: type, address: address, uri: uri, description: description, employeenum: employeenum },
           function( data ) {
             var content = $( data ).find( '#content' );
             

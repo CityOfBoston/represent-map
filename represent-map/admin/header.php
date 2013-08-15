@@ -74,16 +74,16 @@ if($page != "login") {
                 <span class='badge badge-info'>$total_pending</span>
               </a>
             </li>
-            <li"; if($view == "pendinghiring") { $admin_head .= " class='active'"; } $admin_head .= ">
-              <a href='hiring.php?view=pendinghiring'>
-                Potential Hiring
-                <span class='badge badge-info'>$total_pendinghiring</span>
-              </a>
-            </li>
             <li"; if($view == "hiring") { $admin_head .= " class='active'"; } $admin_head .= ">
               <a href='hiring.php?view=hiring'>
                 Hiring
                 <span class='badge badge-info'>$total_hiring</span>
+              </a>
+            </li>
+            <li"; if($view == "pendinghiring") { $admin_head .= " class='active'"; } $admin_head .= ">
+              <a href='hiring.php?view=pendinghiring'>
+                Pending Hiring
+                <span class='badge badge-info'>$total_pendinghiring</span>
               </a>
             </li>
             <li"; if($view == "rejected") { $admin_head .= " class='active'"; } $admin_head .= ">
