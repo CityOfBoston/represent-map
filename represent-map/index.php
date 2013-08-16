@@ -183,7 +183,6 @@ include_once "header.php";
               Array('#60d991', 'Food and Retail'),
               Array('#73d76b', 'Institutional and Non-Profit'),
               Array('#abd576', 'Industrial'),
-              /* Array('#d4d181', 'Food and Retail'), */
               Array('#d49779', 'Other')
               );
           $marker_id = 0;
@@ -224,26 +223,6 @@ include_once "header.php";
               $marker_id++;
             }
           }
-          /* 
-          if($show_events == true) {
-            $place[type] = "event";
-            $events = mysql_query("SELECT * FROM events WHERE start_date > ".time()." AND start_date < ".(time()+4838400)." ORDER BY id DESC");
-            $events_total = mysql_num_rows($events);
-            while($event = mysql_fetch_assoc($events)) {
-              $event[title] = htmlspecialchars_decode(addslashes(htmlspecialchars($event[title])));
-              $event[description] = htmlspecialchars_decode(addslashes(htmlspecialchars($event[description])));
-              $event[uri] = addslashes(htmlspecialchars($event[uri]));
-              $event[address] = htmlspecialchars_decode(addslashes(htmlspecialchars($event[address])));
-              $event[start_date] = date("D, M j @ g:ia", $event[start_date]);
-              echo "
-                markers.push(['".$event[title]."', 'event', '".$event[lat]."', '".$event[lng]."', '".$event[start_date]."', '".$event[uri]."', '".$event[address]."']); 
-                markerTitles[".$marker_id."] = '".$event[title]."';
-              "; 
-              $count[$place[type]]++;
-              $marker_id++;
-            }
-          }
-          */
         ?>
 
         // add markers
@@ -397,6 +376,27 @@ include_once "header.php";
         });
         
         markerCluster = new MarkerClusterer(map, gmarkers, { zoomOnClick: false });
+        
+        // show welcome modal
+        $("#modal_start").modal('show');
+        $("#seemap").click(function(){
+          $("#modal_start").modal('hide');
+        });
+        $("#seehiring").click(function(){
+          $("#modal_start").modal('hide');
+          markerCluster.clearMarkers();
+          var hiring = [];
+          for(var m=0;m<markers.length;m++){
+            if(markers[m][8] == '2'){
+              hiring.push(gmarkers[m]);
+            }
+          }
+          markerCluster.addMarkers( hiring );
+        });
+        $("#quickadd").click(function(){
+          $("#modal_start").modal('hide');
+          $("#modal_add").modal('show');
+        });
       }
 
       function getNearbyMarkers(latlng){
@@ -447,24 +447,32 @@ include_once "header.php";
 
       // hide all markers of a given type
       function hide(type) {
+        $(".filter_"+type.split(" ")[0]).addClass("inactive");
+        var clustered = [ ];
         for (var i=0; i<gmarkers.length; i++) {
-          if (gmarkers[i].type == type) {
+          if(! $(".filter_"+gmarkers[i].type.split(" ")[0]).hasClass("inactive") ){
+            clustered.push( gmarkers[i] );
+          }
+          else{
             gmarkers[i].setVisible(false);
           }
         }
-        $(".filter_"+type.split(" ")[0]).addClass("inactive");
-        markerCluster.redraw();
+        markerCluster.clearMarkers();
+        markerCluster.addMarkers(clustered);
       }
 
       // show all markers of a given type
       function show(type) {
+        $(".filter_"+type.split(" ")[0]).removeClass("inactive");
+        var clustered = [ ];
         for (var i=0; i<gmarkers.length; i++) {
-          if (gmarkers[i].type == type) {
+          if(! $(".filter_"+gmarkers[i].type.split(" ")[0]).hasClass("inactive") ){
             gmarkers[i].setVisible(true);
+            clustered.push( gmarkers[i] );
           }
         }
-        $(".filter_"+type.split(" ")[0]).removeClass("inactive");
-        markerCluster.redraw();
+        markerCluster.clearMarkers();
+        markerCluster.addMarkers(clustered);
       }
       
       // toggle (hide/show) marker list of a given type
@@ -552,11 +560,6 @@ include_once "header.php";
               Array('#abd576', 'Industrial'),
               Array('#d49779', 'Other')
               );
-          /*
-          if($show_events == true) {
-            $types[] = Array('event', 'Events'); 
-          }
-          */
           $marker_id = 0;
           foreach($types as $type) {
             if($type[0] != "event") {
@@ -588,13 +591,39 @@ include_once "header.php";
           }
         ?>
         <li class="blurb">
-          This map was made to connect and promote the Boston tech startup community.
+          This map was made to connect and promote Boston's Innovation District.
         </li>
         <li class="attribution">
           <!-- per our license, you may not remove this line -->
           <?=$attribution?>
+          <br/>
+          Map tiles by Skobbler GmbH
         </li>
       </ul>
+    </div>
+
+    <!-- start screen modal -->
+    <div class="modal hide" id="modal_start">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3>Welcome</h3>
+      </div>
+      <div class="modal-body">
+        <div class="hero-unit">
+          <h2><img src="/images/bostonlogo.png"/>Boston's Innovation District Map</h2>
+          <div id="seemap" class="btn btn-primary">
+            See Map
+          </div>
+          <div id="seehiring" class="btn btn-success">
+            Who's Hiring?
+          </div>
+          <div id="quickadd" class="btn btn-inverse">
+            Add Info
+          </div>
+          <div style="clear:both;"></div>
+        </div>
+        <p>Questions? Feedback? Connect with us: <a href="http://www.innovationdistrict.org/contact/" target="_blank">http://www.innovationdistrict.org/contact/</a></p>
+      </div>
     </div>
     
     <!-- more info modal -->

@@ -13,7 +13,7 @@ $update = mysql_query("UPDATE places SET hiring=1,hirelink='$hirelink',hiredate=
 
 // remove old hirings
 $passed = time() * 1000;
-$update = mysql_query("UPDATE places SET hiring=0,hirelink='',hiredate='' WHERE hiredate>$passed") or die(mysql_error());
+$update = mysql_query("UPDATE places SET hiring=0,hirelink='',hiredate='' WHERE hiredate<$passed") or die(mysql_error());
 
 echo "success";
 exit;

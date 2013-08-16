@@ -502,8 +502,29 @@ html, body, #map_canvas
 {
   margin-top: 25px;
 }
-
-
+#modal_start .modal-body{
+  text-align: center;
+}
+#modal_start .hero-unit{
+  padding: 30px;
+}
+#modal_start img{
+  margin-right: 20px;
+}
+#modal_start h2{
+  font-size: 21px;
+}
+#modal_start .btn{
+  display: block;
+  float: left;
+  width: 27%;
+  height: 50px;
+  vertical-align: middle;
+  margin-top: 15px;
+  padding-top: 30px;
+  font-size: 20px;
+  margin-left: 5px;
+}
 
 /* error overlay */
 .error
