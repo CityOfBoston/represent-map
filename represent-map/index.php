@@ -376,6 +376,53 @@ include_once "header.php";
         });
         
         markerCluster = new MarkerClusterer(map, gmarkers, { zoomOnClick: false });
+        google.maps.event.addListener(markerCluster, 'clusterclick', function(e){
+          var srcMarkers = e.markers_;
+          var manyMarkers = [];
+          for(var i=0;i<srcMarkers.length;i++){
+            for(var m=0;m<gmarkers.length;m++){
+              if(gmarkers[m] == srcMarkers[i]){
+                manyMarkers.push({
+                  id: m
+                });
+                break;
+              }
+            }
+          }
+          var rowmax = 10;
+          if(manyMarkers.length > 30){
+            rowmax = Math.ceil(manyMarkers.length / 3);
+          }
+          var pageViewer="";
+          var tablesOn=false;
+          if(manyMarkers.length > 10){
+            tablesOn=true;
+            if(manyMarkers.length > 30){
+              pageViewer="<div style='min-width:280px;overflow-y:scroll;height:350px;'>";
+            }
+            else{
+              pageViewer="<div style='min-width:280px;'>";
+            }
+          }
+          pageViewer += "<div style='margin-left:auto;margin-right:auto;'>Many at this location: <a href='#' onclick='map.setOptions({center:new google.maps.LatLng(" + e.center_.lat() + ","+ e.center_.lng() + "),zoom:"+(map.getZoom()+2)+"});infowindow.close();'>Zoom</a><br/>";
+          if(manyMarkers.length > 10){
+            pageViewer+="<table><tr><td>";
+          }
+          pageViewer+="<ul>";
+          for(var mPt=0;mPt<manyMarkers.length;mPt++){
+            if((tablesOn)&&(mPt%rowmax==0)&&(mPt!=0)){
+              pageViewer+='</ul></td><td><ul>';
+            }
+            pageViewer+='<li><a href="#" onclick="openMarker('+manyMarkers[mPt].id+');return false;">'+markerTitles[ manyMarkers[mPt].id ]+'</a></li>';
+          }
+          pageViewer+="</ul>";
+          if(tablesOn){
+            pageViewer+="</td></tr></table>";
+          }
+          infowindow.setPosition(e.center_);
+          infowindow.setContent(pageViewer+"</div></div>");
+          infowindow.open(map);
+        });
         
         // show welcome modal
         $("#modal_start").modal('show');
@@ -409,7 +456,6 @@ include_once "header.php";
           if( Math.abs(latlng.lat() - gmarkers[mPt].getCenter().lat()) < ( 0.0001 * zoomFactor )){
             if( Math.abs(latlng.lng() - gmarkers[mPt].getCenter().lng()) < ( 0.0001 * zoomFactor )){
               nMarkers.push({
-                marker: gmarkers[mPt],
                 id: mPt
               });
             }
@@ -614,7 +660,7 @@ include_once "header.php";
           <div id="seemap" class="btn btn-primary">
             See Map
           </div>
-          <div id="seehiring" class="btn btn-success">
+          <div id="seehiring" class="btn btn-success" style="padding-top:25px;padding-bottom:9px;">
             Who's Hiring?
           </div>
           <div id="quickadd" class="btn btn-inverse">

@@ -8,6 +8,8 @@
 body
 {
   color: #555;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 100;
 }
 ul
 {
@@ -183,7 +185,7 @@ html, body, #map_canvas
   top: 0;
   height: 100%;
   background-color: #fff;
-  width: 325px;
+  width: 340px;
 }
 .menu .blurb,
 .menu .attribution
@@ -398,6 +400,9 @@ html, body, #map_canvas
 .modal .modal-body
 {
   background-color: #fff;
+}
+.modal .modal-body p{
+  font-weight: normal;
 }
 .modal .close
 {
