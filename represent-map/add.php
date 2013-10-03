@@ -10,7 +10,7 @@ $title = parseInput($_POST['title']);
 $type = parseInput($_POST['type']);
 $address = parseInput($_POST['address']);
 $uri = parseInput($_POST['uri']);
-$numemployees = parseInput($_POST['numemployees']) * 1;
+$employeenum = parseInput($_POST['employeenum']) * 1;
 $description = parseInput($_POST['description']);
 
 // validate fields
@@ -42,7 +42,7 @@ if(empty($title) || empty($type) || empty($address) || empty($description)) {
     // geocoded point being posted
     $lat = parseInput($_POST['lat']);
     $lng = parseInput($_POST['lng']);
-    $insert = mysql_query("INSERT INTO places (lat, lng, approved, title, type, address, uri, description, owner_name, owner_email) VALUES ($lat, $lng, 1, '$title', '$type', '$address', '$uri', '$description', '$owner_name', '$owner_email')") or die(mysql_error());
+    $insert = mysql_query("INSERT INTO places (lat, lng, approved, title, type, address, uri, description, owner_name, owner_email, employeenum) VALUES ($lat, $lng, 1, '$title', '$type', '$address', '$uri', '$description', '$owner_name', '$owner_email', $employeenum)") or die(mysql_error());
     echo "posted";
     exit;
   
@@ -50,7 +50,7 @@ if(empty($title) || empty($type) || empty($address) || empty($description)) {
     // normal mode enabled, save new data to local db
     
     // insert into db, wait for approval
-    $insert = mysql_query("INSERT INTO places (approved, title, type, address, uri, description, owner_name, owner_email, numemployees) VALUES (null, '$title', '$type', '$address', '$uri', '$description', '$owner_name', '$owner_email', $numemployees)") or die(mysql_error());
+    $insert = mysql_query("INSERT INTO places (approved, title, type, address, uri, description, owner_name, owner_email, employeenum) VALUES (null, '$title', '$type', '$address', '$uri', '$description', '$owner_name', '$owner_email', $employeenum)") or die(mysql_error());
 
     // geocode new submission
     $hide_geocode_output = true;

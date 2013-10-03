@@ -14,7 +14,7 @@ include_once "header.php";
     Create a map for your startup community!
     https://github.com/abenzer/represent-map
     -->
-    <title>Meet Boston Startups</title>
+    <title>Meet Boston's Innovation District</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700|Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -75,6 +75,31 @@ include_once "header.php";
         // set map styles
         var mapStyles = [
          {
+           stylers: [
+             { visibility: "off" }
+           ]
+         },
+         {
+           featureType: "administrative",
+           stylers: [ { visibility: "on" } ]
+         },
+         {
+           featureType: "poi",
+           stylers: [ { visibility: "on" } ]
+         },
+         {
+           featureType: "road",
+           stylers: [ { visibility: "on" } ]
+         },
+         {
+           featureType: "transit",
+           stylers: [ { visibility: "on" } ]
+         },
+         {
+           featureType: "water",
+           stylers: [ { visibility: "on" } ]
+         },
+         {
             featureType: "road",
             elementType: "geometry",
             stylers: [
@@ -118,7 +143,7 @@ include_once "header.php";
             stylers: [
               { visibility: "on" },
               { gamma: 0.41 },
-              { lightness: 46 }
+              { lightness: 76 }
             ]
           },{
             featureType: "administrative.neighborhood",
@@ -152,6 +177,7 @@ include_once "header.php";
         
         map.fitBounds( new google.maps.LatLngBounds( new google.maps.LatLng(42.343472, -71.05295), new google.maps.LatLng(42.354699, -71.015) ) );
         
+        /*
         var osmMapLayer = new google.maps.ImageMapType({
           getTileUrl: function(coord, zoom) {
             return "http://tiles1.skobbler.net/osm_tiles2/" + zoom + "/" + coord.x + "/" + coord.y + ".png";
@@ -164,6 +190,7 @@ include_once "header.php";
         });
         map.mapTypes.set('Skobbler',osmMapLayer);
         map.setMapTypeId('Skobbler');
+        */
 
         zoomLevel = map.getZoom();
 
@@ -562,9 +589,9 @@ include_once "header.php";
       <div class="wrapper">
         <div class="right">
           <div class="share">
-            <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://bostonstartups.aws.af.cm/" data-text="Meet Boston's startups:" data-via="notifyboston" data-count="none">Tweet</a>
+            <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://bostoninnovationdistrict.aws.af.cm/" data-text="Meet Boston's Innovation District:" data-via="DoITBoston" data-count="none">Tweet</a>
             <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-            <div class="fb-like" data-href="http://bostonstartups.aws.af.cm/" data-send="false" data-layout="button_count" data-width="100" data-show-faces="false" data-font="arial"></div>
+            <div class="fb-like" data-href="http://bostoninnovationdistrict.aws.af.cm/" data-send="false" data-layout="button_count" data-width="100" data-show-faces="false" data-font="arial"></div>
             <a href="api.php" class="btn btn-inverse"><i class="icon-info-sign icon-white"></i>&nbsp;API</a>
           </div>
         </div>
@@ -575,7 +602,7 @@ include_once "header.php";
             </a>
           </div>
           <div class="logo logo2">
-            <strong>Boston's Innovation District</strong>          
+            <strong>Boston's Innovation District <small>BETA</small></strong>          
           </div>
           <div class="buttons">
             <a href="#modal_add" class="btn btn-large btn-success" data-toggle="modal"><i class="icon-plus-sign icon-white"></i>Add Company</a>
