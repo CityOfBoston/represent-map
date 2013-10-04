@@ -45,6 +45,39 @@ Setup should be super easy. Follow these steps:
 7. Once visitors to your site have submitted their own markers, point your browser to /admin to approve/reject them.
 8. Challenge your newly-discovered neighbors to ping pong!
 
+Setting up on Heroku
+--------------------------------
+
+Register for Heroku.
+
+    gem install heroku
+    git clone git@github.com:CityOfBoston/represent-map.git
+    
+Go to the main directory of this project
+
+    cd represent-map
+
+Edit index.php with your city name, social media links, map view, etc. Replace images/logo.png with your logo.
+
+Create your app and attach a free MySQL instance from ClearDB
+
+    heroku create APP_NAME_GOES_HERE
+    heroku addons:add cleardb:ignite
+
+Get the MySQL URL from ClearDB
+
+    heroku config
+
+In include/db.php, set variables from the URL. The MySQL URL should have format mysql://USERNAME:PASSWORD@HOSTNAME/DATABASENAME?reconnect=true
+
+Also set $admin_user and $admin_pass in include/db.php
+
+Now push the app to Heroku and view:
+
+    git add .
+    git commit -m "commit messages"
+    git push heroku master
+    heroku open
 
 Setting up on AppFog
 --------------------------------
@@ -55,20 +88,20 @@ Register for AppFog, create an app, go to the 'Services' panel, and add MySQL wi
 
 Download this repo, AppFog, and tunneling tool Caldecott
 
-    git clone git@github.com:mapmeld/represent-map.git
+    git clone git@github.com:CityOfBoston/represent-map.git
     gem install af
     af login
     gem install caldecott
 
 Go to the main directory of this project
 
-    cd represent-map/represent-map
+    cd represent-map
 
-Edit index.php with your city name, social media links, latitude and longitude, etc.
+Edit index.php with your city name, social media links, map view, etc.
 
 Replace images/logo.png with your logo.
 
-Set $admin_user and $admin_pass in db.php - the rest are imported from AppFog's VCAP_SERVICES environment variable.
+Set $admin_user and $admin_pass in include/db.php - the rest are imported from AppFog's VCAP_SERVICES environment variable.
 
 Push the code to the AppFog app server
 
